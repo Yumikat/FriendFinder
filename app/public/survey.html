@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Friend Finder</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Quicksand" rel="stylesheet">
+        <link type="text/css" href="../../style.css">
+</head>
+
+<body>
+<div class="container" id="overallDisplay">
+    <h1 class="display-4">Welcome to the Quiz!</h1>
+
+    <form action="/api/friends" method="POST" role="form">
+        <div class="form-group">
+            <label for="yourName">Your Name: </label>
+            <input type="text" class="form-control" id="userName" placeholder="Yumi Kat">
+        </div>
+        <div class="form-group">
+            <label for="yourPicture">Link to Your Picture: </label>
+            <input type="text" class="form-control" id="userPhoto">
+        </div>
+
+        <div class="container">
+
+            <h2>Please answer the following questions: </h2>
+            <h4>Strongly disagree (1), disagree (2), Neither agree/disagree (3), Agree (4), Strongly Agree (5)</h4>
+            <div id="quiz-display"></div>
+            <p><button type="submit" class="btn btn-primary" id="submit">Submit</button></p>
+    </form>
+    </div>
+</div>
+
+    <script>
+        // module.exports = answersChosen;
+        var answersChosen = [];
+        questions = [
+            {
+                question: "You love being outdoors",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You're a very social person",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You prefer hot weather over the cold",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You like the feeling of wind blowing",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You travel often",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You love your personal space",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You have a ton of free time to do your own things",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You're always cleaning",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You love having constant companionship",
+                answers: [1, 2, 3, 4, 5]
+            },
+            {
+                question: "You're very allergic to fur",
+                answers: [1, 2, 3, 4, 5]
+            }
+        ]
+        renderQuestion();
+
+        function renderQuestion() {
+            $("#quiz-display").empty();
+            var oForm = $("<form>");
+            $("#quiz-display").append(oForm);
+
+            for (var i = 0; i < questions.length; i++) {
+                var a = $("<div>").addClass("font").text("" + [i + 1] + "." + " " + questions[i].question);
+                oForm.append(a);
+                for (var j = 0; j < 5; j++) {
+                    var b = $("<input>").addClass("radioButtons");
+                    b.attr("type", 'radio').attr("value", questions[i].answers[j]).attr('name', [i]).attr('padding', '20px');
+                    oForm.append(b, questions[i].answers[j]);
+                }
+                var br = $("<br><br>");
+                oForm.append(br);
+            }
+        }
+
+        $("#submit").on("click", function () {
+            event.preventDefault();
+            for (var i = 0; i < questions.length; i++) {
+                var radioValue = $("input[name ='" + i + "']:checked").val();
+                answersChosen.push(radioValue);
+            }
+            var newUser = {
+                userName: $("#userName").val().trim(),
+                userPhoto: $("#userPhoto").val().trim(),
+                answers: answersChosen
+            }
+            // console.log(newUser);
+            // var currentURL = window.location.origin;
+            $.post("/api/friends", newUser).then(function (data) {
+                console.log(data);
+                var displayArea = $("<div>");
+                    displayArea.append("<h1>Congrats, "+newUser.userName+"! You've matched with a "+data.bestFriend+".</h1>");
+                    displayArea.append("<img src='"+data.bestPhoto+"' alt='"+data.bestFriend+"'/>");
+                $("#overallDisplay").html(displayArea);
+            });
+        });
+
+
+    </script>
+</body>
+
+</html>
+
+<!-- // {
+//     question: "How much do you like being outdoors?",
+//     answers: ["Never", "Sometimes", "About half the time", "A lot!", "I live outdoors"],
+// },
+// {
+//     question: "Are you a very social person?",
+//     answers: ["What's that?", "Not really", "I can be", "Yes!", "I can't ever be alone"],
+// },
+// {
+//     question: "How much do you prefer hot weather over the cold?",
+//     answers: ["I can't stand the heat", "I tolerate it", "I like it", "I love the heat", "I need it to be 80 degrees Farenheit minimum!"],
+// },
+// {
+//     question: "Do you like the feeling of wind blowing?",
+//     answers: ["Absolutely hate it!", "I could do without it", "Wind is wind", "I love the feeling!", "I wish I could fly like a bird"],
+// },
+// {
+//     question: "How often do you travel in a month?",
+//     answers: ["What is travel?", "Does going to the grocery store count?", "I do if there's a sale", "Maybe 3-4x", "I don't have a home"],
+// },
+// {
+//     question: "Do you have a lot of free time to do your own things?",
+//     answers: ["I don't know what that is!", "I'm pretty busy", "It depends on school or work", "I am a free spirit", "I do not have obligations"],
+// },
+// {
+//     question: "How often do you clean, in general?",
+//     answers: ["Someone else cleans, not me!", "If there is nothing clean to use, I will", "Normal amount", "I clean a lot", "I love cleaning!"],
+// }, -->
